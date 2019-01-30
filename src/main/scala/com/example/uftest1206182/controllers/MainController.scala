@@ -12,12 +12,13 @@ import io.swagger.models.Swagger
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class MainController @Inject()(s: Swagger,
-                               msgSvc: SampleMessageService,
-                               idRepo: RideIDRepo,
-                               uuidRepo: UUIDRepo,
-                               orderRepo: MongoDBOrderRepo)
-    extends SwaggerController {
+class MainController @Inject()(
+    s: Swagger,
+    msgSvc: SampleMessageService,
+    idRepo: RideIDRepo,
+    uuidRepo: UUIDRepo,
+    orderRepo: MongoDBOrderRepo
+) extends SwaggerController {
   implicit protected val swagger = s
 
   getWithDoc("/tstmsg/:name") { o =>
@@ -58,7 +59,7 @@ class MainController @Inject()(s: Swagger,
   } { req: CreateOrderRequest =>
     (for {
       oid <- idRepo.genId
-      _   <- orderRepo.put(Order(oid, safeStatus(req.status), req.details))
+      _   <- orderRepo.putOrder(Order(oid, safeStatus(req.status), req.details))
     } yield response.ok.json(CreateOrderResponse(oid.id.toString()))).run
   }
 }

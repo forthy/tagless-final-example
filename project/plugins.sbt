@@ -3,10 +3,11 @@ resolvers += Resolver.url("bintray-sbt-plugin-releases", url("http://dl.bintray.
 )
 resolvers += Classpaths.sbtPluginReleases
 
+addSbtPlugin("org.wartremover"                % "sbt-wartremover"           % "2.4.1")
 addSbtPlugin("au.com.onegeek"                 %% "sbt-dotenv"               % "1.2.88")
 addSbtPlugin("com.github.gseitz"              % "sbt-release"               % "1.0.7")
 addSbtPlugin("com.typesafe.sbt"               % "sbt-git"                   % "0.9.3")
-addSbtPlugin("com.softwaremill.clippy"        % "plugin-sbt"                % "0.5.3")
+addSbtPlugin("com.softwaremill.clippy"        % "plugin-sbt"                % "0.6.0")
 addSbtPlugin("com.sksamuel.scapegoat"         %% "sbt-scapegoat"            % "1.0.9")
 addSbtPlugin("org.scoverage"                  % "sbt-scoverage"             % "1.5.1")
 addSbtPlugin("com.47deg"                      % "sbt-microsites"            % "0.7.16")
@@ -21,6 +22,7 @@ addSbtPlugin("org.programmiersportgruppe.sbt" %% "tabulartestreporter"      % "4
 addSbtPlugin("com.outr"                       % "giant-scala-plugin"        % "1.2.0")
 addSbtPlugin("org.scalameta"                  % "sbt-mdoc"                  % "1.1.1")
 addSbtPlugin("com.github.cb372"               % "sbt-explicit-dependencies" % "0.2.6")
+addSbtPlugin("com.codacy"                     % "sbt-codacy-coverage"       % "2.112")
 // addSbtPlugin("com.lucidchart"          % "sbt-scalafmt"             % "1.15")
 // addSbtPlugin("io.get-coursier"         % "sbt-coursier"             % "1.0.0-M15-1")
 // addSbtPlugin("si.urbas"                % "sbt-release-notes-plugin" % "0.0.3")

@@ -19,7 +19,7 @@ trait DataConverter[T] {
 }
 
 class IntDataConverter extends DataConverter[Int] {
-  def convert(v: String): Option[Int] = allCatch.opt(v.toInt)
+  def convert(v: String): Option[Int] = allCatch[Int].opt(v.toInt)
 }
 
 class StringDataConverter extends DataConverter[String] {
@@ -27,16 +27,16 @@ class StringDataConverter extends DataConverter[String] {
 }
 
 class BooleanDataConverter extends DataConverter[Boolean] {
-  def convert(v: String): Option[Boolean] = allCatch.opt(v.toBoolean)
+  def convert(v: String): Option[Boolean] = allCatch[Boolean].opt(v.toBoolean)
 }
 
 class LongDataConverter extends DataConverter[Long] {
-  def convert(v: String): Option[Long] = allCatch.opt(v.toLong)
+  def convert(v: String): Option[Long] = allCatch[Long].opt(v.toLong)
 }
 
 // TODO - should handle the exception cases
 class UriDataConverter extends DataConverter[Url] {
-  def convert(v: String): Option[Url] = allCatch.opt(parse(v))
+  def convert(v: String): Option[Url] = allCatch[Url].opt(parse(v))
 }
 
 object DataConverter {

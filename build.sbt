@@ -8,7 +8,6 @@ import scala.language.postfixOps
 fork in run := true
 
 resolvers += Resolver.sonatypeRepo("releases")
-resolvers += "maven.twttr.com" at "https://maven.twttr.com"
 resolvers += Resolver.jcenterRepo
 
 enablePlugins(
@@ -53,6 +52,8 @@ addCompilerPlugin("com.github.cb372" %% "scala-typed-holes"  % "0.0.3")
 addCompilerPlugin(("io.tryp" % "splain" % "0.3.5").cross(CrossVersion.patch))
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
 
+wartremoverWarnings ++= Warts.all
+
 lazy val versions = new {
   val finatra        = "19.1.0"
   val guice          = "4.2.2"
@@ -61,7 +62,7 @@ lazy val versions = new {
   val scalatest      = "3.0.5"
   val junitInterface = "0.11"
   val dockerItScala  = "0.10.0-beta4"
-  val scalaUri       = "1.3.1"
+  val scalaUri       = "1.4.0"
   val hamsters       = "2.6.0"
   val fluentdScala   = "0.2.5"
   val swaggerFinatra = "18.12.0"
@@ -71,32 +72,33 @@ lazy val versions = new {
   val perfolation    = "1.0.4"
   val mouse          = "0.20"
   val ride           = "1.0.1"
-  val giantMongoDB   = "1.2.13"
-  val monix          = "3.0.0-RC2"
+  val giantMongoDB   = "1.3.0"
+  val monix          = "3.0.0-fbcb270"
   val scalaCache     = "0.27.0"
   val meowMTL        = "0.2.0"
   val newtype        = "0.4.2"
 }
 
 libraryDependencies ++= Seq(
-  "io.estatico"                   %% "newtype"                        % versions.newtype,
-  "com.olegpy"                    %% "meow-mtl"                       % versions.meowMTL,
-  "com.github.cb372"              %% "scalacache-core"                % versions.scalaCache,
-  "com.github.cb372"              %% "scalacache-caffeine"            % versions.scalaCache,
-  "io.monix"                      %% "monix-execution"                % versions.monix,
-  "com.outr"                      %% "giant-scala"                    % versions.giantMongoDB,
-  "com.github.kolotaev"           %% "ride"                           % versions.ride,
-  "com.jakehschwartz"             %% "finatra-swagger"                % versions.swaggerFinatra,
-  "org.typelevel"                 %% "mouse"                          % versions.mouse,
-  "com.outr"                      %% "perfolation"                    % versions.perfolation,
+  "io.estatico"         %% "newtype"                % versions.newtype,
+  "com.olegpy"          %% "meow-mtl"               % versions.meowMTL,
+  "com.github.cb372"    %% "scalacache-core"        % versions.scalaCache,
+  "com.github.cb372"    %% "scalacache-cats-effect" % versions.scalaCache,
+  "com.github.cb372"    %% "scalacache-caffeine"    % versions.scalaCache,
+  "io.monix"            %% "monix-execution"        % versions.monix,
+  "com.outr"            %% "giant-scala"            % versions.giantMongoDB,
+  "com.github.kolotaev" %% "ride"                   % versions.ride,
+  "com.jakehschwartz"   %% "finatra-swagger"        % versions.swaggerFinatra,
+  "org.typelevel"       %% "mouse"                  % versions.mouse,
+  "com.outr"            %% "perfolation"            % versions.perfolation,
 //  "com.github.mehmetakiftutuncu"  %% "errors"                         % versions.scalaErrors,
 //  "io.catbird"                    %% "catbird-finagle"                % versions.catbird,
 //  "io.catbird"                    %% "catbird-effect"                 % versions.catbird,
 //  "com.github.tomakehurst"        % "wiremock"                        % versions.wireMock,
 //  "eu.inn"                        %% "fluentd-scala"                  % versions.fluentdScala,
 //  "io.github.scala-hamsters"      %% "hamsters"                       % versions.hamsters,
-  "io.lemonlabs"                  %% "scala-uri"                      % versions.scalaUri,
-  "com.twitter"                   %% "finatra-http"                   % versions.finatra,
+  "io.lemonlabs" %% "scala-uri"    % versions.scalaUri,
+  "com.twitter"  %% "finatra-http" % versions.finatra,
 //  "com.twitter"                   %% "finatra-httpclient"             % versions.finatra,
   "com.twitter"                   %% "finatra-jackson"                % versions.finatra,
   "ch.qos.logback"                % "logback-classic"                 % versions.logback,
@@ -121,7 +123,7 @@ libraryDependencies ++= Seq(
   "com.whisk"                     %% "docker-testkit-core"            % versions.dockerItScala % "test",
   "com.chuusai"                   %% "shapeless"                      % "2.3.3",
   "com.github.ben-manes.caffeine" % "caffeine"                        % "2.6.2",
-  "com.google.inject"             % "guice"                           % "4.0",
+  "com.google.inject"             % "guice"                           % "4.2.2",
   "com.outr"                      %% "profig"                         % "2.3.4",
   "com.outr"                      %% "profig-macros"                  % "2.3.4",
   "com.twitter"                   %% "finagle-base-http"              % "19.1.0",
@@ -135,13 +137,14 @@ libraryDependencies ++= Seq(
   "com.twitter"                   %% "util-core"                      % "19.1.0",
   "com.twitter"                   %% "util-slf4j-api"                 % "19.1.0",
   "io.catbird"                    %% "catbird-util"                   % "19.1.0",
-  "io.circe"                      %% "circe-core"                     % "0.10.1",
-  "io.circe"                      %% "circe-generic"                  % "0.10.1",
-  "io.circe"                      %% "circe-generic-extras"           % "0.10.1",
+  "io.catbird"                    %% "catbird-effect"                 % "19.1.0",
+  "io.circe"                      %% "circe-core"                     % "0.11.1",
+  "io.circe"                      %% "circe-generic"                  % "0.11.1",
+  "io.circe"                      %% "circe-generic-extras"           % "0.11.1",
   "io.swagger"                    % "swagger-models"                  % "1.5.21",
   "javax.inject"                  % "javax.inject"                    % "1",
-  "org.mongodb"                   % "bson"                            % "3.9.0",
-  "org.mongodb"                   % "mongodb-driver-core"             % "3.9.0",
+  "org.mongodb"                   % "bson"                            % "3.9.1",
+  "org.mongodb"                   % "mongodb-driver-core"             % "3.9.1",
   "org.mongodb.scala"             %% "mongo-scala-bson"               % "2.5.0",
   "org.scala-lang"                % "scala-reflect"                   % "2.12.8",
   "org.typelevel"                 %% "cats-core"                      % "1.5.0"
@@ -248,7 +251,7 @@ dockerVersion := Some(DockerVersion(17, 9, 1, Some("ce")))
 defaultLinuxInstallLocation in Docker := "/opt/tagless-final-example"
 packageName in Docker := "vr/finatra-sample-service"
 // dockerBaseImage := "openjdk:8-jre-slim"
-dockerBaseImage := "findepi/graalvm:1.0.0-rc10"
+dockerBaseImage := "findepi/graalvm:1.0.0-rc11"
 version in Docker := s"${if (gitHeadCode.value != "na") s"${version.value}_${gitHeadCode.value}" else version.value}"
 maintainer in Docker := "Richard Chuo <richard_chuo@htc.com>"
 dockerExposedPorts := Seq(9999, 9990)
