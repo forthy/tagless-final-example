@@ -1,23 +1,26 @@
 package com.example.uftest1206182.functions.implementations
 
+import cats.syntax.apply._
+import cats.syntax.option._
+import com.example.uftest1206182.ServerMain._
 import com.example.uftest1206182.datastore.Database
 import com.example.uftest1206182.functions.OrderRepo
 import com.example.uftest1206182.models.IDModel.ID
-import com.example.uftest1206182.models.{Order, OrderBson}
-import com.github.kolotaev.ride.Id
-import io.catbird.util.Rerunnable
-import javax.inject.{Inject, Singleton}
 import com.example.uftest1206182.models.OrderStatus._
-import io.github.hamsters.twitter.Implicits._
-import perfolation._
-import com.example.uftest1206182.ServerMain._
-import com.twitter.inject.Logging
-import mouse.option._
-import scalacache._
-import scalacache.modes.sync._
-import scala.concurrent.duration._
-import cats.syntax.option._
+import com.example.uftest1206182.models.{Order, OrderBson}
 import com.example.uftest1206182.util.AppConfigLib._
+import com.github.kolotaev.ride.Id
+import com.twitter.inject.Logging
+import io.catbird.util.Rerunnable
+import io.catbird.util.effect._
+import io.github.hamsters.twitter.Implicits._
+import javax.inject.{Inject, Singleton}
+import mouse.option._
+import perfolation._
+import scalacache.CatsEffect.modes._
+import scalacache.{get => getF, put => putF, remove => removeF, _}
+
+import scala.concurrent.duration._
 
 @Singleton
 class MongoDBOrderRepo @Inject()(db: Database, cache: Cache[Order]) extends OrderRepo[Rerunnable] with Logging {
@@ -28,19 +31,15 @@ class MongoDBOrderRepo @Inject()(db: Database, cache: Cache[Order]) extends Orde
 
   type T = Id
 
-  def put(order: Order): Rerunnable[Order] =
-    Rerunnable.fromFuture(insert(toBson(order)).toTwitterFuture).flatMap {
-      case Right(ob) =>
-        Rerunnable {
-          sync.put(ob._id)(order, ttl)
-
-          order
-        }
-      case Left(e) => Rerunnable.raiseError(new Error(p"Order insert failed - reason:[${e.`type`.code}]", e.throwable))
+  def putOrder(order: Order): Rerunnable[Order] =
+    Rerunnable.fromFuture(insert(toBson(order))).flatMap {
+      case Right(ob) => putF[Rerunnable, Order](ob._id)(order, ttl) *> Rerunnable.const(order)
+      case Left(e) =>
+        Rerunnable.raiseError[Order](new Error(p"Order insert failed - reason:[${e.`type`.code}]", e.throwable))
     }
 
-  def get(orderId: ID[Id]): Rerunnable[Option[Order]] =
-    Rerunnable(sync.get(orderId.id.toString())).flatMap(
+  def getOrder(orderId: ID[Id]): Rerunnable[Option[Order]] =
+    getF[Rerunnable, Order](orderId.id.toString()).flatMap(
       _.cata(
         o => Rerunnable.const(o.some),
         Rerunnable.fromFuture(
@@ -55,13 +54,13 @@ class MongoDBOrderRepo @Inject()(db: Database, cache: Cache[Order]) extends Orde
       )
     )
 
-  def remove(orderId: ID[Id]): Rerunnable[Option[Order]] =
-    get(orderId).flatMap(
+  def removeOrder(orderId: ID[Id]): Rerunnable[Option[Order]] =
+    getOrder(orderId).flatMap(
       orderOpt =>
         orderOpt
           .map { o =>
-            sync.remove(orderId.id.toString())
-            Rerunnable.fromFuture(delete(orderId.id.toString()).map(_.map(_ => o.some)))
+            removeF[Rerunnable, Order](orderId.id.toString()) *> Rerunnable
+              .fromFuture(delete(orderId.id.toString()).map(_.map(_ => o.some)))
           }
           .cata(_.map {
             case Right(r) => r

@@ -10,7 +10,7 @@ class SampleMessageService extends RerunnableService[String, SMessage] with Logg
   override def apply(request: String): Rerunnable[SMessage] =
     request match {
       case "anonymous" => Rerunnable.const(FailureMessage("Your name, please?"))
-      case "unknown"   => Rerunnable.raiseError(new Error("UNKNOWN-NOT-ALLOWED"))
+      case "unknown"   => Rerunnable.raiseError[SMessage](new Error("UNKNOWN-NOT-ALLOWED"))
       case x           => Rerunnable.const(GreetingsMessage(p"Hello, $x"))
     }
 }

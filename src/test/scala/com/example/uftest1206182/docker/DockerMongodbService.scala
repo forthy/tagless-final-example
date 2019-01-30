@@ -7,10 +7,10 @@ import com.whisk.docker.testkit.{Container, ContainerSpec, DockerReadyChecker, M
 import org.scalatest.Suite
 
 trait DockerMongodbService extends DockerTestKitForAll with Logging { self: Suite =>
-  val DefaultMongodbPort: Int = 27017
+  val defaultMongodbPort: Int = 27017
 
   val mongodbContainer: Container = ContainerSpec("mongo:3.6.5")
-    .withPortBindings(DefaultMongodbPort -> PortBinding.of("0.0.0.0", DefaultMongodbPort))
+    .withPortBindings(defaultMongodbPort -> PortBinding.of("0.0.0.0", defaultMongodbPort))
     .withReadyChecker(DockerReadyChecker.LogLineContains("waiting for connections on port"))
     .toContainer
 

@@ -6,7 +6,7 @@ import com.example.uftest1206182.models.Order
 trait OrderRepo[F[_]] {
   type T
 
-  def put(order: Order): F[Order]
-  def get(orderId: ID[T]): F[Option[Order]]
-  def remove(orderId: ID[T]): F[Option[Order]]
+  def putOrder(order: Order): F[Order]
+  def getOrder(orderId: ID[T]): F[Option[Order]]
+  def removeOrder(orderId: ID[T]): F[Option[Order]]
 }
